@@ -1,0 +1,22 @@
+ [
+   {
+     "nome": "Real Madrid",
+     "liga": "La Liga",
+     "emblemaLocal": "emblema_real_madrid.png"
+   },
+   {
+     "nome": "Barcelona",
+     "liga": "La Liga",
+     "emblemaLocal": "emblema_barcelona.png"
+   },
+   {
+     "nome": "Manchester United",
+     "liga": "Premier League",
+     "emblemaLocal": "emblema_man_utd.png"
+   },
+   {
+     "nome": "Paris Saint-Germain",
+     "liga": "Ligue 1",
+     "emblemaLocal": "emblema_psg.png"
+   }
+ ]
