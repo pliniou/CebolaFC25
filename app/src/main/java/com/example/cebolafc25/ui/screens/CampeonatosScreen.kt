@@ -14,14 +14,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.example.cebolafc25.R
 import com.example.cebolafc25.domain.model.TipoCampeonato
 import com.example.cebolafc25.domain.viewmodel.CampeonatosViewModel
+import com.example.cebolafc25.navigation.TOURNAMENT_DETAILS_ROUTE
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CampeonatosScreen(
+    navController: NavController,
     viewModel: CampeonatosViewModel = hiltViewModel()
 ) {
     val campeonatos by viewModel.campeonatos.collectAsStateWithLifecycle()
@@ -68,7 +71,6 @@ fun CampeonatosScreen(
                     }
                 }
             }
-
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(stringResource(id = R.string.tournaments_existing_title), style = MaterialTheme.typography.titleLarge)
@@ -82,7 +84,13 @@ fun CampeonatosScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(campeonatos, key = { it.id }) { camp ->
-                        Card(modifier = Modifier.fillMaxWidth()) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    navController.navigate("$TOURNAMENT_DETAILS_ROUTE/${camp.id}")
+                                }
+                        ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()

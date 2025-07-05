@@ -5,8 +5,7 @@
     <string name="bottom_nav_tournaments">Campeonatos</string>
     <string name="bottom_nav_stats">Estatísticas</string>
     <string name="bottom_nav_players">Jogadores</string>
-    <string name="bottom_nav_settings">Configurações</string>
-    <string name="home_welcome">Bem-vindo ao EA FC 25 Manager!</string>
+    <string name="home_welcome">Bem-vindo ao Cebolão FC25 Manager!</string>
     <string name="home_register_match">Registrar Partida</string>
     <string name="home_create_tournament">Criar Campeonato</string>
     <string name="players_title">Jogadores</string>
@@ -44,10 +43,6 @@
     <string name="stats_header_draws">E</string>
     <string name="stats_header_losses">D</string>
     <string name="stats_header_goal_difference">SG</string>
-    <string name="settings_title">Configurações</string>
-    <string name="settings_main_text">Tela de Configurações</string>
-    <string name="settings_subtitle_text">Ajuste suas preferências, tema e gerencie dados aqui.</string>
-    <string name="settings_todo">TODO: Adicionar opções de tema, exportação/importação, etc.</string>
     <string name="partida_vm_fill_fields_correctly">Preencha todos os campos corretamente!</string>
     <string name="partida_vm_register_success">Partida registrada com sucesso!</string>
     <string name="partida_vm_register_error">Erro ao registrar partida: %1$s</string>

@@ -9,7 +9,6 @@ import com.example.cebolafc25.data.dao.JogadorDao
 import com.example.cebolafc25.data.dao.ParticipanteCampeonatoDao
 import com.example.cebolafc25.data.dao.PartidaCampeonatoCrossRefDao
 import com.example.cebolafc25.data.dao.PartidaDao
-import com.example.cebolafc25.data.dao.TimeDao
 import com.example.cebolafc25.data.model.CampeonatoEntity
 import com.example.cebolafc25.data.model.JogadorEntity
 import com.example.cebolafc25.data.model.ParticipanteCampeonato
@@ -31,8 +30,8 @@ import com.example.cebolafc25.data.model.TimeEntity
 )
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
+
     abstract fun jogadorDao(): JogadorDao
-    abstract fun timeDao(): TimeDao
     abstract fun partidaDao(): PartidaDao
     abstract fun campeonatoDao(): CampeonatoDao
     abstract fun participanteCampeonatoDao(): ParticipanteCampeonatoDao

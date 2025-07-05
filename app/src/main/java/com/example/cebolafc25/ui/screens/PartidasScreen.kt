@@ -5,21 +5,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -51,12 +48,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.cebolafc25.R
 import com.example.cebolafc25.data.model.JogadorEntity
-import com.example.cebolafc25.data.model.PartidaEntity
+import com.example.cebolafc25.data.model.TimeEntity
 import com.example.cebolafc25.domain.viewmodel.PartidaFormEvent
 import com.example.cebolafc25.domain.viewmodel.PartidaFormState
 import com.example.cebolafc25.domain.viewmodel.PartidasViewModel
 import com.example.cebolafc25.domain.viewmodel.UiEvent
-import java.time.format.DateTimeFormatter
+import com.example.cebolafc25.ui.components.PartidaCard
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -94,21 +91,25 @@ fun PartidasScreen(
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp)
         ) {
-            if (partidas.isEmpty() && jogadores.size < 2) {
-                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stringResource(id = R.string.matches_need_2_players),
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-            } else if (partidas.isEmpty()) {
-                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    Text(stringResource(id = R.string.matches_none_registered), style = MaterialTheme.typography.bodyMedium)
-                }
-            } else {
-                LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp), contentPadding = PaddingValues(top = 16.dp, bottom = 8.dp)) {
+            LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp), contentPadding = PaddingValues(top = 16.dp, bottom = 8.dp)) {
+                if (jogadores.size < 2) {
+                    item {
+                        Box(modifier = Modifier.fillParentMaxSize(), contentAlignment = Alignment.Center) {
+                            Text(
+                                text = stringResource(id = R.string.matches_need_2_players),
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+                    }
+                } else if (partidas.isEmpty()) {
+                    item {
+                        Box(modifier = Modifier.fillParentMaxSize(), contentAlignment = Alignment.Center) {
+                            Text(stringResource(id = R.string.matches_none_registered), style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
+                } else {
                     items(partidas, key = { it.id }) { partida ->
                         PartidaCard(partida = partida, getNomeJogador = { id ->
                             jogadores.find { it.id == id }?.nome ?: stringResource(id = R.string.matches_player_unknown)
@@ -119,31 +120,39 @@ fun PartidasScreen(
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-            MatchRegistrationForm(
-                formState = formState,
-                onEvent = viewModel::onEvent,
-                jogadores = jogadores
-            )
+            if (jogadores.size >= 2) {
+                MatchRegistrationForm(
+                    formState = formState,
+                    onEvent = viewModel::onEvent,
+                    jogadores = jogadores,
+                    getAvailableLeagues = viewModel::getAvailableLeagues,
+                    getTeamsForLeague = viewModel::getTeamsForLeague
+                )
+            }
         }
     }
 }
 
 @Composable
-fun MatchRegistrationForm(
+private fun MatchRegistrationForm(
     formState: PartidaFormState,
     onEvent: (PartidaFormEvent) -> Unit,
-    jogadores: List<JogadorEntity>
+    jogadores: List<JogadorEntity>,
+    getAvailableLeagues: () -> List<String>,
+    getTeamsForLeague: (String) -> List<TimeEntity>
 ) {
-    val availableJogadores2 = jogadores.filter { it.id != formState.jogador1Id }
-
-    Column(modifier = Modifier.heightIn(max = 350.dp)) {
+    Column(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+    ) {
         Text(
             text = stringResource(id = R.string.matches_register_new),
             style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier.padding(bottom = 12.dp)
         )
-
+        // Player Selection
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            val availableJogadores2 = jogadores.filter { it.id != formState.jogador1Id }
             PlayerDropdown(
                 label = stringResource(id = R.string.matches_player1_label),
                 selectedPlayerId = formState.jogador1Id,
@@ -161,20 +170,72 @@ fun MatchRegistrationForm(
                 enabled = availableJogadores2.isNotEmpty()
             )
         }
+        Spacer(modifier = Modifier.height(12.dp))
 
-        Spacer(modifier = Modifier.height(8.dp))
+        // Team and Score Selection
         Row(
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            val goalsLabel = stringResource(id = R.string.matches_goals_label)
-            OutlinedTextField(value = formState.time1Nome, onValueChange = { onEvent(PartidaFormEvent.UpdateTime1(it)) }, label = { Text(stringResource(id = R.string.matches_team1_label)) }, modifier = Modifier.weight(1f), singleLine = true)
-            OutlinedTextField(value = formState.placar1, onValueChange = { onEvent(PartidaFormEvent.UpdatePlacar1(it)) }, label = { Text(goalsLabel) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = Modifier.width(80.dp), textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center))
-            Text(text = "x", style = MaterialTheme.typography.headlineSmall)
-            OutlinedTextField(value = formState.placar2, onValueChange = { onEvent(PartidaFormEvent.UpdatePlacar2(it)) }, label = { Text(goalsLabel) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = Modifier.width(80.dp), textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center))
-            OutlinedTextField(value = formState.time2Nome, onValueChange = { onEvent(PartidaFormEvent.UpdateTime2(it)) }, label = { Text(stringResource(id = R.string.matches_team2_label)) }, modifier = Modifier.weight(1f), singleLine = true)
-        }
+            // Player 1 Team Selection
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                GenericDropdown(
+                    label = "Liga J1",
+                    selectedValue = formState.liga1,
+                    items = getAvailableLeagues(),
+                    onItemSelected = { onEvent(PartidaFormEvent.UpdateLiga1(it)) }
+                )
+                GenericDropdown(
+                    label = stringResource(id = R.string.matches_team1_label),
+                    selectedValue = formState.time1Nome,
+                    items = getTeamsForLeague(formState.liga1).map { it.nome },
+                    onItemSelected = { onEvent(PartidaFormEvent.UpdateTime1(it)) },
+                    enabled = formState.liga1.isNotBlank()
+                )
+            }
 
+            // Score
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(top = 24.dp) // Align with text fields
+            ) {
+                val goalsLabel = stringResource(id = R.string.matches_goals_label)
+                OutlinedTextField(
+                    value = formState.placar1,
+                    onValueChange = { onEvent(PartidaFormEvent.UpdatePlacar1(it)) },
+                    label = { Text(goalsLabel) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.width(80.dp),
+                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center)
+                )
+                Text(text = "x", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(vertical = 8.dp))
+                OutlinedTextField(
+                    value = formState.placar2,
+                    onValueChange = { onEvent(PartidaFormEvent.UpdatePlacar2(it)) },
+                    label = { Text(goalsLabel) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.width(80.dp),
+                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center)
+                )
+            }
+
+            // Player 2 Team Selection
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                GenericDropdown(
+                    label = "Liga J2",
+                    selectedValue = formState.liga2,
+                    items = getAvailableLeagues(),
+                    onItemSelected = { onEvent(PartidaFormEvent.UpdateLiga2(it)) }
+                )
+                GenericDropdown(
+                    label = stringResource(id = R.string.matches_team2_label),
+                    selectedValue = formState.time2Nome,
+                    items = getTeamsForLeague(formState.liga2).map { it.nome },
+                    onItemSelected = { onEvent(PartidaFormEvent.UpdateTime2(it)) },
+                    enabled = formState.liga2.isNotBlank()
+                )
+            }
+        }
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = { onEvent(PartidaFormEvent.RegisterPartida) },
@@ -189,7 +250,7 @@ fun MatchRegistrationForm(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlayerDropdown(
+private fun PlayerDropdown(
     label: String,
     selectedPlayerId: UUID?,
     players: List<JogadorEntity>,
@@ -197,16 +258,42 @@ fun PlayerDropdown(
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
-    var expanded by remember { mutableStateOf(false) }
     val selectedPlayerName = players.find { it.id == selectedPlayerId }?.nome ?: ""
+    GenericDropdown(
+        label = label,
+        selectedValue = selectedPlayerName,
+        items = players.map { it.nome },
+        onItemSelected = { selectedName ->
+            players.find { it.nome == selectedName }?.id?.let { onPlayerSelected(it) }
+        },
+        modifier = modifier,
+        enabled = enabled,
+        itemToValue = { selectedName ->
+            players.find { it.nome == selectedName }?.let { it.nome } ?: ""
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun GenericDropdown(
+    label: String,
+    selectedValue: String,
+    items: List<String>,
+    onItemSelected: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    itemToValue: (String) -> String = { it }
+) {
+    var expanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { if(enabled) expanded = !expanded },
+        expanded = expanded && enabled,
+        onExpandedChange = { if (enabled) expanded = !expanded },
         modifier = modifier
     ) {
         OutlinedTextField(
-            value = selectedPlayerName,
+            value = selectedValue,
             onValueChange = {},
             readOnly = true,
             label = { Text(label) },
@@ -216,74 +303,18 @@ fun PlayerDropdown(
             enabled = enabled
         )
         ExposedDropdownMenu(
-            expanded = expanded,
+            expanded = expanded && enabled,
             onDismissRequest = { expanded = false }
         ) {
-            players.forEach { jogador ->
+            items.forEach { item ->
                 DropdownMenuItem(
-                    text = { Text(jogador.nome) },
+                    text = { Text(item) },
                     onClick = {
-                        onPlayerSelected(jogador.id)
+                        onItemSelected(itemToValue(item))
                         expanded = false
                     }
-                    // CORREÇÃO: Removido o modificador .clickable {} redundante.
-                    // O parâmetro onClick do DropdownMenuItem já gerencia a ação de clique.
                 )
             }
         }
-    }
-}
-
-@Composable
-fun PartidaCard(partida: PartidaEntity, getNomeJogador: @Composable (UUID) -> String) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = stringResource(id = R.string.matches_date_prefix, partida.data.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                PlayerResultColumn(
-                    playerName = getNomeJogador(partida.jogador1Id),
-                    teamName = partida.time1Nome
-                )
-                Text(
-                    text = "${partida.placar1} x ${partida.placar2}",
-                    style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-                PlayerResultColumn(
-                    playerName = getNomeJogador(partida.jogador2Id),
-                    teamName = partida.time2Nome
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun RowScope.PlayerResultColumn(playerName: String, teamName: String) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.weight(1f)
-    ) {
-        Text(text = playerName, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center, maxLines = 1)
-        Text(
-            text = teamName,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            maxLines = 1
-        )
     }
 }

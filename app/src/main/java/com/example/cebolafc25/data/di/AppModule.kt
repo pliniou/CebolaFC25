@@ -23,8 +23,6 @@ object AppModule {
             AppDatabase::class.java,
             "eafc25-database"
         )
-            // Em produção, uma estratégia de migração real deve ser implementada
-            // em vez de fallbackToDestructiveMigration().
             .fallbackToDestructiveMigration()
             .build()
     }

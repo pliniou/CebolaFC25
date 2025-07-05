@@ -5,18 +5,14 @@ import androidx.lifecycle.viewModelScope
 import com.example.cebolafc25.R
 import com.example.cebolafc25.data.model.JogadorEntity
 import com.example.cebolafc25.data.model.PartidaEntity
+import com.example.cebolafc25.data.model.TimeEntity
 import com.example.cebolafc25.data.repository.JogadorRepository
 import com.example.cebolafc25.data.repository.PartidaRepository
+import com.example.cebolafc25.data.repository.TeamRepository
 import com.example.cebolafc25.domain.usecase.RegisterPartidaUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
@@ -24,6 +20,8 @@ import javax.inject.Inject
 data class PartidaFormState(
     val jogador1Id: UUID? = null,
     val jogador2Id: UUID? = null,
+    val liga1: String = "",
+    val liga2: String = "",
     val time1Nome: String = "",
     val time2Nome: String = "",
     val placar1: String = "",
@@ -33,6 +31,8 @@ data class PartidaFormState(
         get() = jogador1Id != null &&
                 jogador2Id != null &&
                 jogador1Id != jogador2Id &&
+                liga1.isNotBlank() &&
+                liga2.isNotBlank() &&
                 time1Nome.isNotBlank() &&
                 time2Nome.isNotBlank() &&
                 placar1.toIntOrNull() != null &&
@@ -42,6 +42,8 @@ data class PartidaFormState(
 sealed interface PartidaFormEvent {
     data class UpdateJogador1(val id: UUID?) : PartidaFormEvent
     data class UpdateJogador2(val id: UUID?) : PartidaFormEvent
+    data class UpdateLiga1(val liga: String) : PartidaFormEvent
+    data class UpdateLiga2(val liga: String) : PartidaFormEvent
     data class UpdateTime1(val name: String) : PartidaFormEvent
     data class UpdateTime2(val name: String) : PartidaFormEvent
     data class UpdatePlacar1(val score: String) : PartidaFormEvent
@@ -57,6 +59,7 @@ sealed interface UiEvent {
 class PartidasViewModel @Inject constructor(
     partidaRepository: PartidaRepository,
     jogadorRepository: JogadorRepository,
+    private val teamRepository: TeamRepository,
     private val registerPartidaUseCase: RegisterPartidaUseCase
 ) : ViewModel() {
 
@@ -80,10 +83,17 @@ class PartidasViewModel @Inject constructor(
     private val _eventChannel = Channel<UiEvent>()
     val uiEvent = _eventChannel.receiveAsFlow()
 
+    fun getAvailableLeagues(): List<String> = teamRepository.getLeagues()
+
+    fun getTeamsForLeague(leagueName: String): List<TimeEntity> = teamRepository.getTeamsForLeague(leagueName)
+
+
     fun onEvent(event: PartidaFormEvent) {
         when (event) {
             is PartidaFormEvent.UpdateJogador1 -> _formState.update { it.copy(jogador1Id = event.id) }
             is PartidaFormEvent.UpdateJogador2 -> _formState.update { it.copy(jogador2Id = event.id) }
+            is PartidaFormEvent.UpdateLiga1 -> _formState.update { it.copy(liga1 = event.liga, time1Nome = "") } // Reseta o time ao trocar a liga
+            is PartidaFormEvent.UpdateLiga2 -> _formState.update { it.copy(liga2 = event.liga, time2Nome = "") } // Reseta o time ao trocar a liga
             is PartidaFormEvent.UpdateTime1 -> _formState.update { it.copy(time1Nome = event.name) }
             is PartidaFormEvent.UpdateTime2 -> _formState.update { it.copy(time2Nome = event.name) }
             is PartidaFormEvent.UpdatePlacar1 -> _formState.update { it.copy(placar1 = event.score.filter { c -> c.isDigit() }) }
@@ -102,7 +112,6 @@ class PartidasViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            // Uso de let para garantir null-safety sem o operador '!!'
             val p1 = currentState.placar1.toIntOrNull()
             val p2 = currentState.placar2.toIntOrNull()
 

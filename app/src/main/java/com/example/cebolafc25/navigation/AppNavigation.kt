@@ -29,11 +29,13 @@ sealed class BottomNavItem(val route: String, val icon: ImageVector, val titleRe
     data object Tournaments : BottomNavItem("tournaments", Icons.Filled.EmojiEvents, R.string.bottom_nav_tournaments)
     data object Stats : BottomNavItem("stats", Icons.Filled.QueryStats, R.string.bottom_nav_stats)
     data object Players : BottomNavItem("players", Icons.Default.People, R.string.bottom_nav_players)
-    data object Settings : BottomNavItem("settings", Icons.Default.Settings, R.string.bottom_nav_settings)
 }
 
 const val PLAYER_ID_ARG = "playerId"
 const val PLAYER_DETAILS_ROUTE = "player_details"
+const val TOURNAMENT_ID_ARG = "tournamentId"
+const val TOURNAMENT_DETAILS_ROUTE = "tournament_details"
+
 
 @Composable
 fun AppNavigation(navController: NavHostController) {
@@ -43,7 +45,6 @@ fun AppNavigation(navController: NavHostController) {
         BottomNavItem.Tournaments,
         BottomNavItem.Stats,
         BottomNavItem.Players,
-        BottomNavItem.Settings
     )
 
     Scaffold(
@@ -80,16 +81,20 @@ fun AppNavigation(navController: NavHostController) {
         ) {
             composable(BottomNavItem.Home.route) { HomeScreen(navController = navController) }
             composable(BottomNavItem.Matches.route) { PartidasScreen() }
-            composable(BottomNavItem.Tournaments.route) { CampeonatosScreen() }
+            composable(BottomNavItem.Tournaments.route) { CampeonatosScreen(navController = navController) }
             composable(BottomNavItem.Stats.route) { EstatisticasScreen() }
             composable(BottomNavItem.Players.route) { JogadoresScreen(navController = navController) }
-            composable(BottomNavItem.Settings.route) { ConfiguracoesScreen() }
-
             composable(
                 route = "$PLAYER_DETAILS_ROUTE/{$PLAYER_ID_ARG}",
                 arguments = listOf(navArgument(PLAYER_ID_ARG) { type = NavType.StringType })
             ) {
                 JogadorDetalhesScreen(navController = navController)
+            }
+            composable(
+                route = "$TOURNAMENT_DETAILS_ROUTE/{$TOURNAMENT_ID_ARG}",
+                arguments = listOf(navArgument(TOURNAMENT_ID_ARG) { type = NavType.StringType })
+            ) {
+                CampeonatoDetalhesScreen(navController = navController)
             }
         }
     }

@@ -87,25 +87,6 @@ Para compilar e executar o projeto, siga os passos abaixo:
     -   Selecione um emulador ou um dispositivo físico (API 24+).
     -   Clique no botão `Run 'app'`.
 
-## 📈 Principais Refatorações e Melhorias
-
-Este projeto passou por um processo de refatoração focado em qualidade, performance e manutenibilidade.
-
--   **Pureza Arquitetural:** Lógica de negócio movida dos ViewModels para `UseCases` dedicados, aderindo ao Princípio de Responsabilidade Única (SRP).
--   **Segurança de Ciclo de Vida:** Substituição da coleta de `Flows` em blocos `init` por `collectAsStateWithLifecycle` na UI, prevenindo memory leaks.
--   **Otimização de Performance:** Adição da dependência de `Baseline Profiles` para acelerar a inicialização do app e reduzir o jank.
--   **Integridade do Banco de Dados:** Uso de `@Transaction` no Room para garantir operações atômicas e seguras.
--   **Segurança de Rede:** Implementação de um `network-security-config` para forçar conexões HTTPS.
--   **Acessibilidade (a11y):** Adição de `contentDescription` em elementos visuais para compatibilidade com leitores de tela.
-
-## 🗺️ Roadmap e Futuras Melhorias
-
--   [ ] **Modularização:** Separar cada funcionalidade (Partidas, Jogadores, etc.) em módulos de features.
--   [ ] **Testes de UI:** Adicionar testes de Snapshot com Paparazzi ou Roborazzi para garantir a consistência visual.
--   [ ] **CI/CD:** Implementar um pipeline no GitHub Actions para rodar testes e gerar builds automaticamente.
--   [ ] **Criptografia do Banco:** Adicionar criptografia com [SQLCipher](https://www.zetetic.net/sqlcipher/) para proteger os dados locais.
--   [ ] **Sincronização na Nuvem:** Implementar uma API REST para permitir que os usuários façam backup e sincronizem seus dados.
-
 ## 📄 Licença
 
 Este projeto está licenciado sob a Licença MIT. Veja o arquivo [LICENSE.md](LICENSE.md) para mais detalhes.
