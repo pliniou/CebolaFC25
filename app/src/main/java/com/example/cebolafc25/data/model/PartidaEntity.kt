@@ -7,12 +7,16 @@ import java.util.UUID
 
 @Entity(tableName = "partidas")
 data class PartidaEntity(
-    @PrimaryKey val id: UUID = UUID.randomUUID(), // ID único para a partida
-    val data: LocalDate, // Data da partida
-    val jogador1Id: UUID, // ID do Jogador 1
-    val jogador2Id: UUID, // ID do Jogador 2
-    val time1Nome: String, // Nome do time do Jogador 1
-    val time2Nome: String, // Nome do time do Jogador 2
-    val placar1: Int, // Placar do Jogador 1
-    val placar2: Int // Placar do Jogador 2
+    @PrimaryKey val id: UUID = UUID.randomUUID(),
+    val data: LocalDate,
+    val jogador1Id: UUID,
+    val jogador2Id: UUID,
+    val time1Nome: String,
+    val time2Nome: String,
+    val placar1: Int,
+    val placar2: Int,
+    // NOVO CAMPO: ID do campeonato (opcional, para partidas amistosas)
+    val campeonatoId: UUID? = null, 
+    // NOVO CAMPO: Indica se a partida já teve o resultado registrado
+    val partidaFinalizada: Boolean = false 
 )

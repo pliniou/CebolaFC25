@@ -66,6 +66,7 @@ fun PartidasScreen(
     val formState by viewModel.formState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val unknownPlayer = stringResource(id = R.string.matches_player_unknown)
 
     LaunchedEffect(key1 = true) {
         viewModel.uiEvent.collect { event ->
@@ -80,7 +81,6 @@ fun PartidasScreen(
             }
         }
     }
-
     Scaffold(
         topBar = { CenterAlignedTopAppBar(title = { Text(stringResource(id = R.string.matches_title)) }) },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
@@ -111,15 +111,17 @@ fun PartidasScreen(
                     }
                 } else {
                     items(partidas, key = { it.id }) { partida ->
-                        PartidaCard(partida = partida, getNomeJogador = { id ->
-                            jogadores.find { it.id == id }?.nome ?: stringResource(id = R.string.matches_player_unknown)
-                        })
+                        val nomeJogador1 = jogadores.find { it.id == partida.jogador1Id }?.nome ?: unknownPlayer
+                        val nomeJogador2 = jogadores.find { it.id == partida.jogador2Id }?.nome ?: unknownPlayer
+                        PartidaCard(
+                            partida = partida,
+                            nomeJogador1 = nomeJogador1,
+                            nomeJogador2 = nomeJogador2
+                        )
                     }
                 }
             }
-
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
             if (jogadores.size >= 2) {
                 MatchRegistrationForm(
                     formState = formState,
@@ -171,7 +173,6 @@ private fun MatchRegistrationForm(
             )
         }
         Spacer(modifier = Modifier.height(12.dp))
-
         // Team and Score Selection
         Row(
             verticalAlignment = Alignment.Top,
@@ -193,7 +194,6 @@ private fun MatchRegistrationForm(
                     enabled = formState.liga1.isNotBlank()
                 )
             }
-
             // Score
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -218,7 +218,6 @@ private fun MatchRegistrationForm(
                     textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center)
                 )
             }
-
             // Player 2 Team Selection
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 GenericDropdown(
@@ -286,7 +285,6 @@ private fun GenericDropdown(
     itemToValue: (String) -> String = { it }
 ) {
     var expanded by remember { mutableStateOf(false) }
-
     ExposedDropdownMenuBox(
         expanded = expanded && enabled,
         onExpandedChange = { if (enabled) expanded = !expanded },

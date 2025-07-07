@@ -17,7 +17,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge() // Habilita o modo edge-to-edge
-
         setContent {
             EAFC25ManagerTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {

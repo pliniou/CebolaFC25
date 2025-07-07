@@ -3,6 +3,7 @@ package com.example.cebolafc25.navigation
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -20,6 +21,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.example.cebolafc25.R
 import com.example.cebolafc25.ui.screens.*
 
@@ -35,7 +37,8 @@ const val PLAYER_ID_ARG = "playerId"
 const val PLAYER_DETAILS_ROUTE = "player_details"
 const val TOURNAMENT_ID_ARG = "tournamentId"
 const val TOURNAMENT_DETAILS_ROUTE = "tournament_details"
-
+const val MATCH_ID_ARG = "matchId"
+const val MATCH_DETAILS_ROUTE = "match_details"
 
 @Composable
 fun AppNavigation(navController: NavHostController) {
@@ -46,7 +49,6 @@ fun AppNavigation(navController: NavHostController) {
         BottomNavItem.Stats,
         BottomNavItem.Players,
     )
-
     Scaffold(
         bottomBar = {
             NavigationBar {
@@ -86,7 +88,8 @@ fun AppNavigation(navController: NavHostController) {
             composable(BottomNavItem.Players.route) { JogadoresScreen(navController = navController) }
             composable(
                 route = "$PLAYER_DETAILS_ROUTE/{$PLAYER_ID_ARG}",
-                arguments = listOf(navArgument(PLAYER_ID_ARG) { type = NavType.StringType })
+                arguments = listOf(navArgument(PLAYER_ID_ARG) { type = NavType.StringType }),
+                deepLinks = listOf(navDeepLink { uriPattern = "cebolafc://player/{$PLAYER_ID_ARG}" })
             ) {
                 JogadorDetalhesScreen(navController = navController)
             }
@@ -95,6 +98,12 @@ fun AppNavigation(navController: NavHostController) {
                 arguments = listOf(navArgument(TOURNAMENT_ID_ARG) { type = NavType.StringType })
             ) {
                 CampeonatoDetalhesScreen(navController = navController)
+            }
+            composable(
+                route = "$MATCH_DETAILS_ROUTE/{$MATCH_ID_ARG}",
+                arguments = listOf(navArgument(MATCH_ID_ARG) { type = NavType.StringType })
+            ) {
+                PartidaDetalhesScreen(navController = navController)
             }
         }
     }

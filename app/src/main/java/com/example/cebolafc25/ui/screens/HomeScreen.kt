@@ -35,6 +35,7 @@ fun HomeScreen(
 ) {
     val ultimasPartidas by viewModel.ultimasPartidas.collectAsStateWithLifecycle()
     val jogadores by viewModel.jogadores.collectAsStateWithLifecycle()
+    val unknownPlayer = stringResource(id = R.string.matches_player_unknown)
 
     Column(
         modifier = Modifier
@@ -61,11 +62,9 @@ fun HomeScreen(
         ) {
             Text(stringResource(id = R.string.home_create_tournament))
         }
-
         Spacer(modifier = Modifier.height(32.dp))
         HorizontalDivider()
         Spacer(modifier = Modifier.height(16.dp))
-
         Text(
             text = "Últimas Partidas",
             style = MaterialTheme.typography.titleLarge,
@@ -73,7 +72,6 @@ fun HomeScreen(
                 .padding(bottom = 16.dp)
                 .align(Alignment.Start)
         )
-
         if (ultimasPartidas.isEmpty()) {
             Box(
                 modifier = Modifier.weight(1f),
@@ -84,10 +82,13 @@ fun HomeScreen(
         } else {
             LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(ultimasPartidas, key = { it.id }) { partida ->
-                    PartidaCard(partida = partida, getNomeJogador = { id ->
-                        jogadores.find { it.id == id }?.nome
-                            ?: stringResource(id = R.string.matches_player_unknown)
-                    })
+                    val nomeJogador1 = jogadores.find { it.id == partida.jogador1Id }?.nome ?: unknownPlayer
+                    val nomeJogador2 = jogadores.find { it.id == partida.jogador2Id }?.nome ?: unknownPlayer
+                    PartidaCard(
+                        partida = partida,
+                        nomeJogador1 = nomeJogador1,
+                        nomeJogador2 = nomeJogador2
+                    )
                 }
             }
         }

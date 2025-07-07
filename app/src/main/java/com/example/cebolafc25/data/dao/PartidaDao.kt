@@ -30,17 +30,14 @@ interface PartidaDao {
     @Query("SELECT * FROM partidas WHERE id = :partidaId")
     fun getPartidaById(partidaId: UUID): Flow<PartidaEntity?>
 
+    @Query("SELECT * FROM partidas WHERE campeonatoId = :campeonatoId ORDER BY data DESC")
+    fun getPartidasByCampeonatoId(campeonatoId: UUID): Flow<List<PartidaEntity>>
+
     @Query("SELECT * FROM partidas ORDER BY data DESC, id DESC")
     fun getAllPartidas(): Flow<List<PartidaEntity>>
 
     @Query("SELECT * FROM partidas WHERE jogador1Id = :jogadorId OR jogador2Id = :jogadorId ORDER BY data DESC")
     fun getPartidasByJogador(jogadorId: UUID): Flow<List<PartidaEntity>>
-
-    @Query("SELECT * FROM partidas WHERE data = :date ORDER BY data DESC")
-    fun getPartidasByDate(date: LocalDate): Flow<List<PartidaEntity>>
-
-    @Query("SELECT * FROM partidas WHERE time1Nome = :teamName OR time2Nome = :teamName ORDER BY data DESC")
-    fun getPartidasByTeam(teamName: String): Flow<List<PartidaEntity>>
 
     @Query("DELETE FROM partidas WHERE id = :partidaId")
     suspend fun deletePartidaById(partidaId: UUID)

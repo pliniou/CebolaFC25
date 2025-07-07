@@ -26,7 +26,6 @@ class JogadorDetalhesViewModel @Inject constructor(
     partidaRepository: PartidaRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-
     private val playerId: String = savedStateHandle.get<String>(PLAYER_ID_ARG) ?: ""
 
     val jogadorDetalhesState: StateFlow<UiState<EstatisticasJogador>> =

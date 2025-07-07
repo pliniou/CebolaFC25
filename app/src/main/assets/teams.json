@@ -1,6 +1,6 @@
 [
   {
-    "leagueName": "Seleções Nacionais Masculinas",
+    "leagueName": "Seleções Masculinas",
     "teams": [
       { "teamName": "Argentina" },
       { "teamName": "Austrália" },
@@ -40,7 +40,7 @@
     ]
   },
   {
-    "leagueName": "Premier League (Inglaterra)",
+    "leagueName": "Premier League",
     "teams": [
       { "teamName": "Arsenal" },
       { "teamName": "Aston Villa" },
@@ -65,7 +65,7 @@
     ]
   },
   {
-    "leagueName": "LALIGA EA SPORTS (Espanha)",
+    "leagueName": "LA LIGA Espanha",
     "teams": [
       { "teamName": "Alavés" },
       { "teamName": "Athletic Bilbao" },
@@ -89,7 +89,7 @@
     ]
   },
   {
-    "leagueName": "Bundesliga (Alemanha)",
+    "leagueName": "Bundesliga",
     "teams": [
       { "teamName": "Augsburg" },
       { "teamName": "Bayer Leverkusen" },
@@ -112,7 +112,7 @@
     ]
   },
   {
-    "leagueName": "Serie A TIM (Itália)",
+    "leagueName": "Serie A Itália",
     "teams": [
       { "teamName": "Atalanta" },
       { "teamName": "Bologna" },
@@ -137,7 +137,7 @@
     ]
   },
   {
-    "leagueName": "Ligue 1 Uber Eats (França)",
+    "leagueName": "Ligue 1 França",
     "teams": [
       { "teamName": "Angers" },
       { "teamName": "Auxerre" },
@@ -151,7 +151,7 @@
       { "teamName": "Montpellier" },
       { "teamName": "Nantes" },
       { "teamName": "Nice" },
-      { "teamName": "Paris Saint-Germain (PSG)" },
+      { "teamName": "Paris Saint-Germain" },
       { "teamName": "Reims" },
       { "teamName": "Rennes" },
       { "teamName": "Saint-Étienne" },
@@ -183,7 +183,7 @@
     ]
   },
   {
-    "leagueName": "MLS (EUA/Canadá)",
+    "leagueName": "MLS",
     "teams": [
       { "teamName": "Atlanta United FC" },
       { "teamName": "Austin FC" },
@@ -217,7 +217,7 @@
     ]
   },
   {
-    "leagueName": "Roshn Saudi League (Arábia Saudita)",
+    "leagueName": "Roshn Saudi League",
     "teams": [
       { "teamName": "Abha" },
       { "teamName": "Al-Ahli" },
@@ -261,7 +261,7 @@
     ]
   },
   {
-    "leagueName": "Liga Profesional de Fútbol (Argentina)",
+    "leagueName": "Liga Profesional Argentina",
     "teams": [
       { "teamName": "Argentinos Juniors" },
       { "teamName": "Atlético Tucumán" },
@@ -272,12 +272,12 @@
       { "teamName": "Central Córdoba" },
       { "teamName": "Defensa y Justicia" },
       { "teamName": "Deportivo Riestra" },
-      { "teamName": "Estudiantes de La Plata" },
+      { "teamName": "Estudiantes" },
       { "teamName": "Gimnasia y Esgrima La Plata" },
       { "teamName": "Godoy Cruz" },
       { "teamName": "Huracán" },
       { "teamName": "Independiente" },
-      { "teamName": "Independiente Rivadavia" },
+      { "teamName": "Independiente" },
       { "teamName": "Instituto" },
       { "teamName": "Lanús" },
       { "teamName": "Newell's Old Boys" },

@@ -47,7 +47,6 @@ val md_theme_dark_onSurface = Color(0xFFE1E3DF)
 val md_theme_dark_surfaceVariant = Color(0xFF404943)
 val md_theme_dark_onSurfaceVariant = Color(0xFFC0C9C1)
 
-
 private val DarkColorScheme = darkColorScheme(
     primary = md_theme_dark_primary,
     onPrimary = md_theme_dark_onPrimary,

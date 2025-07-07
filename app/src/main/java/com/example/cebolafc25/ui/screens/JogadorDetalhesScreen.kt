@@ -74,6 +74,7 @@ fun DetalhesContent(stats: EstatisticasJogador) {
     // Exemplo de responsividade: usa BoxWithConstraints para adaptar o layout
     BoxWithConstraints {
         val isTablet = this.maxWidth > 600.dp
+
         Column(
             modifier = Modifier
                 .fillMaxSize()

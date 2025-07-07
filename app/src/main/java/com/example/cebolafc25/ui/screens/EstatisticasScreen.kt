@@ -66,6 +66,7 @@ fun EstatisticasScreen(
                     // Correção: `Divider` obsoleto substituído por `HorizontalDivider`
                     HorizontalDivider(Modifier.padding(top = 8.dp))
                 }
+
                 // Linhas da tabela
                 items(estatisticas, key = { it.jogador.id }) { stats ->
                     EstatisticaRow(stats = stats)

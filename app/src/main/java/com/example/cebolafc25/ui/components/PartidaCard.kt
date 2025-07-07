@@ -23,16 +23,18 @@ import androidx.compose.ui.unit.dp
 import com.example.cebolafc25.R
 import com.example.cebolafc25.data.model.PartidaEntity
 import java.time.format.DateTimeFormatter
-import java.util.UUID
 
 @Composable
-fun PartidaCard(partida: PartidaEntity, getNomeJogador: @Composable (UUID) -> String) {
+fun PartidaCard(
+    partida: PartidaEntity,
+    nomeJogador1: String,
+    nomeJogador2: String
+) {
     val vencedorId = when {
         partida.placar1 > partida.placar2 -> partida.jogador1Id
         partida.placar2 > partida.placar1 -> partida.jogador2Id
         else -> null
     }
-
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -50,7 +52,7 @@ fun PartidaCard(partida: PartidaEntity, getNomeJogador: @Composable (UUID) -> St
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 PlayerResultColumn(
-                    playerName = getNomeJogador(partida.jogador1Id),
+                    playerName = nomeJogador1,
                     teamName = partida.time1Nome,
                     isWinner = vencedorId == partida.jogador1Id
                 )
@@ -60,7 +62,7 @@ fun PartidaCard(partida: PartidaEntity, getNomeJogador: @Composable (UUID) -> St
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
                 PlayerResultColumn(
-                    playerName = getNomeJogador(partida.jogador2Id),
+                    playerName = nomeJogador2,
                     teamName = partida.time2Nome,
                     isWinner = vencedorId == partida.jogador2Id
                 )
@@ -73,7 +75,6 @@ fun PartidaCard(partida: PartidaEntity, getNomeJogador: @Composable (UUID) -> St
 private fun RowScope.PlayerResultColumn(playerName: String, teamName: String, isWinner: Boolean) {
     val fontWeight = if (isWinner) FontWeight.Bold else FontWeight.Normal
     val color = if (isWinner) MaterialTheme.colorScheme.primary else Color.Unspecified
-
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.weight(1f)

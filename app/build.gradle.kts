@@ -33,7 +33,6 @@ android {
     }
     compileOptions {
         // O projeto está configurado para o Java 8.
-        // A compatibilidade com APIs modernas (java.time) é garantida pelo desugaring.
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
         isCoreLibraryDesugaringEnabled = true
