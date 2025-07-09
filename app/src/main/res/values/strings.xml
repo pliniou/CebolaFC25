@@ -1,12 +1,12 @@
 <resources>
     <string name="app_name">Cebola FC 25</string>
     <string name="bottom_nav_home">Início</string>
-    <string name="bottom_nav_matches">Partidas</string>
+    <string name="bottom_nav_matches">Amistosos</string>
     <string name="bottom_nav_tournaments">Campeonatos</string>
     <string name="bottom_nav_stats">Estatísticas</string>
     <string name="bottom_nav_players">Jogadores</string>
     <string name="home_welcome">Bem-vindo ao Cebolão FC25 Manager!</string>
-    <string name="home_register_match">Registrar Partida</string>
+    <string name="home_register_friendly_match">Registrar Partida Amistosa</string>
     <string name="home_create_tournament">Criar Campeonato</string>
     <string name="players_title">Jogadores</string>
     <string name="players_add_new">Adicionar Novo Jogador</string>
@@ -23,10 +23,10 @@
     <string name="tournaments_create_button">Criar</string>
     <string name="tournaments_existing_title">Campeonatos Existentes</string>
     <string name="tournaments_none_created">Nenhum campeonato criado ainda.</string>
-    <string name="matches_title">Partidas</string>
-    <string name="matches_register_new">Registrar Nova Partida</string>
+    <string name="matches_friendly_title">Partidas Amistosas</string>
+    <string name="matches_register_new">Registrar Novo Amistoso</string>
     <string name="matches_need_2_players">Registre ao menos 2 jogadores para começar a adicionar partidas.</string>
-    <string name="matches_none_registered">Nenhuma partida registrada.</string>
+    <string name="matches_none_registered">Nenhum amistoso registrado.</string>
     <string name="matches_date_prefix">Data: %1$s</string>
     <string name="matches_player1_label">Jogador 1</string>
     <string name="matches_player2_label">Jogador 2</string>

@@ -1,5 +1,6 @@
 package com.example.cebolafc25.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,8 @@ import androidx.navigation.NavController
 import com.example.cebolafc25.R
 import com.example.cebolafc25.domain.viewmodel.HomeViewModel
 import com.example.cebolafc25.navigation.BottomNavItem
+import com.example.cebolafc25.navigation.MATCH_DETAILS_ROUTE
+import com.example.cebolafc25.navigation.TOURNAMENT_DETAILS_ROUTE
 import com.example.cebolafc25.ui.components.PartidaCard
 
 @Composable
@@ -54,7 +57,7 @@ fun HomeScreen(
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
-            Text(stringResource(id = R.string.home_register_match))
+            Text(stringResource(id = R.string.home_register_friendly_match)) // Texto alterado para clareza
         }
         Button(
             onClick = { navController.navigate(BottomNavItem.Tournaments.route) },
@@ -66,7 +69,7 @@ fun HomeScreen(
         HorizontalDivider()
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Últimas Partidas",
+            text = "Últimas Partidas Registradas",
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier
                 .padding(bottom = 16.dp)
@@ -84,11 +87,22 @@ fun HomeScreen(
                 items(ultimasPartidas, key = { it.id }) { partida ->
                     val nomeJogador1 = jogadores.find { it.id == partida.jogador1Id }?.nome ?: unknownPlayer
                     val nomeJogador2 = jogadores.find { it.id == partida.jogador2Id }?.nome ?: unknownPlayer
-                    PartidaCard(
-                        partida = partida,
-                        nomeJogador1 = nomeJogador1,
-                        nomeJogador2 = nomeJogador2
-                    )
+
+                    // NOVO: Navegação contextual baseada no tipo de partida
+                    Box(modifier = Modifier.clickable {
+                        val route = if (partida.campeonatoId != null) {
+                            "$TOURNAMENT_DETAILS_ROUTE/${partida.campeonatoId}"
+                        } else {
+                            "$MATCH_DETAILS_ROUTE/${partida.id}"
+                        }
+                        navController.navigate(route)
+                    }) {
+                        PartidaCard(
+                            partida = partida,
+                            nomeJogador1 = nomeJogador1,
+                            nomeJogador2 = nomeJogador2
+                        )
+                    }
                 }
             }
         }

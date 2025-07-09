@@ -30,11 +30,15 @@ interface PartidaDao {
     @Query("SELECT * FROM partidas WHERE id = :partidaId")
     fun getPartidaById(partidaId: UUID): Flow<PartidaEntity?>
 
-    @Query("SELECT * FROM partidas WHERE campeonatoId = :campeonatoId ORDER BY data DESC")
+    @Query("SELECT * FROM partidas WHERE campeonatoId = :campeonatoId ORDER BY data DESC, id DESC")
     fun getPartidasByCampeonatoId(campeonatoId: UUID): Flow<List<PartidaEntity>>
 
     @Query("SELECT * FROM partidas ORDER BY data DESC, id DESC")
     fun getAllPartidas(): Flow<List<PartidaEntity>>
+
+    // NOVO: Método para buscar apenas partidas amistosas (sem campeonato)
+    @Query("SELECT * FROM partidas WHERE campeonatoId IS NULL ORDER BY data DESC, id DESC")
+    fun getAmistosos(): Flow<List<PartidaEntity>>
 
     @Query("SELECT * FROM partidas WHERE jogador1Id = :jogadorId OR jogador2Id = :jogadorId ORDER BY data DESC")
     fun getPartidasByJogador(jogadorId: UUID): Flow<List<PartidaEntity>>

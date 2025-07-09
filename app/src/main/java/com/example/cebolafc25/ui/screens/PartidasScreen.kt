@@ -56,12 +56,15 @@ import com.example.cebolafc25.domain.viewmodel.UiEvent
 import com.example.cebolafc25.ui.components.PartidaCard
 import java.util.UUID
 
+// Tela refatorada para gerenciar apenas Amistosos
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PartidasScreen(
     viewModel: PartidasViewModel = hiltViewModel()
 ) {
-    val partidas by viewModel.partidas.collectAsStateWithLifecycle()
+    // ALTERADO: agora busca apenas amistosos
+    val amistosos by viewModel.amistosos.collectAsStateWithLifecycle()
     val jogadores by viewModel.jogadores.collectAsStateWithLifecycle()
     val formState by viewModel.formState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -70,7 +73,7 @@ fun PartidasScreen(
 
     LaunchedEffect(key1 = true) {
         viewModel.uiEvent.collect { event ->
-            when(event) {
+            when (event) {
                 is UiEvent.ShowSnackbar -> {
                     val message = context.getString(event.messageResId, *event.args.toTypedArray())
                     snackbarHostState.showSnackbar(
@@ -81,8 +84,9 @@ fun PartidasScreen(
             }
         }
     }
+
     Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = { Text(stringResource(id = R.string.matches_title)) }) },
+        topBar = { CenterAlignedTopAppBar(title = { Text(stringResource(id = R.string.matches_friendly_title)) }) }, // Título alterado
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { paddingValues ->
         Column(
@@ -91,26 +95,46 @@ fun PartidasScreen(
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp)
         ) {
-            LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp), contentPadding = PaddingValues(top = 16.dp, bottom = 8.dp)) {
-                if (jogadores.size < 2) {
-                    item {
-                        Box(modifier = Modifier.fillParentMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(
-                                text = stringResource(id = R.string.matches_need_2_players),
-                                style = MaterialTheme.typography.bodyMedium,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(16.dp)
-                            )
-                        }
-                    }
-                } else if (partidas.isEmpty()) {
-                    item {
-                        Box(modifier = Modifier.fillParentMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(stringResource(id = R.string.matches_none_registered), style = MaterialTheme.typography.bodyMedium)
-                        }
-                    }
-                } else {
-                    items(partidas, key = { it.id }) { partida ->
+            // Seção de Formulário movida para o topo para melhor UX
+            if (jogadores.size >= 2) {
+                MatchRegistrationForm(
+                    formState = formState,
+                    onEvent = viewModel::onEvent,
+                    jogadores = jogadores,
+                    getAvailableLeagues = viewModel::getAvailableLeagues,
+                    getTeamsForLeague = viewModel::getTeamsForLeague
+                )
+            } else {
+                Box(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = stringResource(id = R.string.matches_need_2_players),
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+            Text(
+                text = "Histórico de Amistosos",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = 16.dp, top = 8.dp)
+            )
+
+            // Lista de Amistosos
+            if (amistosos.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(stringResource(id = R.string.matches_none_registered), style = MaterialTheme.typography.bodyMedium)
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(bottom = 16.dp)
+                ) {
+                    items(amistosos, key = { it.id }) { partida ->
                         val nomeJogador1 = jogadores.find { it.id == partida.jogador1Id }?.nome ?: unknownPlayer
                         val nomeJogador2 = jogadores.find { it.id == partida.jogador2Id }?.nome ?: unknownPlayer
                         PartidaCard(
@@ -120,16 +144,6 @@ fun PartidasScreen(
                         )
                     }
                 }
-            }
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-            if (jogadores.size >= 2) {
-                MatchRegistrationForm(
-                    formState = formState,
-                    onEvent = viewModel::onEvent,
-                    jogadores = jogadores,
-                    getAvailableLeagues = viewModel::getAvailableLeagues,
-                    getTeamsForLeague = viewModel::getTeamsForLeague
-                )
             }
         }
     }
@@ -197,7 +211,7 @@ private fun MatchRegistrationForm(
             // Score
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(top = 24.dp) // Align with text fields
+                modifier = Modifier.padding(top = 24.dp)
             ) {
                 val goalsLabel = stringResource(id = R.string.matches_goals_label)
                 OutlinedTextField(
@@ -241,7 +255,7 @@ private fun MatchRegistrationForm(
             modifier = Modifier.fillMaxWidth(),
             enabled = formState.isFormValid
         ) {
-            Text(stringResource(id = R.string.home_register_match))
+            Text(stringResource(id = R.string.home_register_friendly_match))
         }
         Spacer(modifier = Modifier.height(16.dp))
     }

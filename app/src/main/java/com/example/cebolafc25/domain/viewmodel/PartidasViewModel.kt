@@ -63,7 +63,8 @@ class PartidasViewModel @Inject constructor(
     private val registerPartidaUseCase: RegisterPartidaUseCase
 ) : ViewModel() {
 
-    val partidas: StateFlow<List<PartidaEntity>> = partidaRepository.getAllPartidas()
+    // ALTERADO: ViewModel agora expõe apenas amistosos
+    val amistosos: StateFlow<List<PartidaEntity>> = partidaRepository.getAmistosos()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
@@ -84,9 +85,7 @@ class PartidasViewModel @Inject constructor(
     val uiEvent = _eventChannel.receiveAsFlow()
 
     fun getAvailableLeagues(): List<String> = teamRepository.getLeagues()
-
     fun getTeamsForLeague(leagueName: String): List<TimeEntity> = teamRepository.getTeamsForLeague(leagueName)
-
 
     fun onEvent(event: PartidaFormEvent) {
         when (event) {

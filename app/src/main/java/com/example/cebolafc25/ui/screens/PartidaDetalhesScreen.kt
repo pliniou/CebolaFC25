@@ -6,6 +6,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,7 +37,7 @@ fun PartidaDetalhesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Registrar Resultado") },
+                title = { Text("Registrar Resultado da Partida") },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
@@ -83,6 +84,7 @@ fun FormularioResultado(
     onSave: () -> Unit
 ) {
     val leagues = viewModel.teamRepository.getLeagues()
+    val isFormEnabled = !state.isFinalizada
 
     Column(
         modifier = Modifier
@@ -92,68 +94,73 @@ fun FormularioResultado(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Exibição dos jogadores
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(state.nomeJogador1, style = MaterialTheme.typography.headlineSmall)
+            Text(state.nomeJogador1, style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
             Text("vs", style = MaterialTheme.typography.titleLarge)
-            Text(state.nomeJogador2, style = MaterialTheme.typography.headlineSmall)
+            Text(state.nomeJogador2, style = MaterialTheme.typography.headlineSmall, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
         }
 
         HorizontalDivider()
 
-        // Formulário de placar e times
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Time Jogador 1
-            TeamSelection(
-                modifier = Modifier.weight(1f),
-                leagues = leagues,
-                selectedTeam = state.time1Nome,
-                onTeamSelected = viewModel::onTime1Change,
-                teamRepository = viewModel.teamRepository,
-                label = "Time J1"
-            )
-
-            // Placar
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                TeamSelection(
+                    leagues = leagues,
+                    selectedTeam = state.time1Nome,
+                    onTeamSelected = viewModel::onTime1Change,
+                    teamRepository = viewModel.teamRepository,
+                    label = "Time - ${state.nomeJogador1}",
+                    enabled = isFormEnabled
+                )
                 OutlinedTextField(
                     value = state.placar1,
                     onValueChange = viewModel::onPlacar1Change,
                     label = { Text("Gols") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.width(80.dp),
-                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center)
+                    modifier = Modifier.width(120.dp),
+                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+                    enabled = isFormEnabled
                 )
-                Spacer(Modifier.height(8.dp))
+            }
+
+            Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                TeamSelection(
+                    leagues = leagues,
+                    selectedTeam = state.time2Nome,
+                    onTeamSelected = viewModel::onTime2Change,
+                    teamRepository = viewModel.teamRepository,
+                    label = "Time - ${state.nomeJogador2}",
+                    enabled = isFormEnabled
+                )
                 OutlinedTextField(
                     value = state.placar2,
                     onValueChange = viewModel::onPlacar2Change,
                     label = { Text("Gols") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.width(80.dp),
-                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center)
+                    modifier = Modifier.width(120.dp),
+                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+                    enabled = isFormEnabled
                 )
             }
-
-            // Time Jogador 2
-            TeamSelection(
-                modifier = Modifier.weight(1f),
-                leagues = leagues,
-                selectedTeam = state.time2Nome,
-                onTeamSelected = viewModel::onTime2Change,
-                teamRepository = viewModel.teamRepository,
-                label = "Time J2"
-            )
         }
 
-        Button(onClick = onSave, modifier = Modifier.fillMaxWidth()) {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = onSave,
+            modifier = Modifier.fillMaxWidth(),
+            enabled = isFormEnabled
+        ) {
+            Icon(Icons.Default.Save, contentDescription = "Salvar")
+            Spacer(Modifier.width(ButtonDefaults.IconSpacing))
             Text("Salvar Resultado")
         }
     }
@@ -167,25 +174,36 @@ fun TeamSelection(
     selectedTeam: String,
     onTeamSelected: (String) -> Unit,
     teamRepository: com.example.cebolafc25.data.repository.TeamRepository,
-    label: String
+    label: String,
+    enabled: Boolean
 ) {
-    var selectedLeague by remember {
-        mutableStateOf(teamRepository.getTeamsForLeague("").find { it.nome == selectedTeam }?.liga ?: leagues.firstOrNull() ?: "")
+    var selectedLeague by remember(selectedTeam, leagues) {
+        mutableStateOf(
+            teamRepository.getTeamsForLeague("").find { it.nome == selectedTeam }?.liga
+                ?: leagues.firstOrNull() ?: ""
+        )
     }
+    var leagueExpanded by remember { mutableStateOf(false) }
+    var teamExpanded by remember { mutableStateOf(false) }
 
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        // Dropdown de Ligas
-        var leagueExpanded by remember { mutableStateOf(false) }
-        ExposedDropdownMenuBox(expanded = leagueExpanded, onExpandedChange = { leagueExpanded = !leagueExpanded }) {
+        ExposedDropdownMenuBox(
+            expanded = leagueExpanded && enabled,
+            onExpandedChange = { if (enabled) leagueExpanded = !leagueExpanded }
+        ) {
             OutlinedTextField(
                 value = selectedLeague,
                 onValueChange = {},
                 readOnly = true,
                 label = { Text("Liga") },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = leagueExpanded) },
-                modifier = Modifier.menuAnchor()
+                modifier = Modifier.menuAnchor(),
+                enabled = enabled
             )
-            ExposedDropdownMenu(expanded = leagueExpanded, onDismissRequest = { leagueExpanded = false }) {
+            ExposedDropdownMenu(
+                expanded = leagueExpanded && enabled,
+                onDismissRequest = { leagueExpanded = false }
+            ) {
                 leagues.forEach { league ->
                     DropdownMenuItem(text = { Text(league) }, onClick = {
                         selectedLeague = league
@@ -195,19 +213,24 @@ fun TeamSelection(
             }
         }
 
-        // Dropdown de Times
-        var teamExpanded by remember { mutableStateOf(false) }
-        val teamsInLeague = teamRepository.getTeamsForLeague(selectedLeague)
-        ExposedDropdownMenuBox(expanded = teamExpanded, onExpandedChange = { teamExpanded = !teamExpanded }) {
+        val teamsInLeague = remember(selectedLeague) { teamRepository.getTeamsForLeague(selectedLeague) }
+        ExposedDropdownMenuBox(
+            expanded = teamExpanded && enabled,
+            onExpandedChange = { if (enabled) teamExpanded = !teamExpanded }
+        ) {
             OutlinedTextField(
                 value = selectedTeam,
                 onValueChange = {},
                 readOnly = true,
                 label = { Text(label) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = teamExpanded) },
-                modifier = Modifier.menuAnchor()
+                modifier = Modifier.menuAnchor(),
+                enabled = enabled
             )
-            ExposedDropdownMenu(expanded = teamExpanded, onDismissRequest = { teamExpanded = false }) {
+            ExposedDropdownMenu(
+                expanded = teamExpanded && enabled,
+                onDismissRequest = { teamExpanded = false }
+            ) {
                 teamsInLeague.forEach { team ->
                     DropdownMenuItem(text = { Text(team.nome) }, onClick = {
                         onTeamSelected(team.nome)

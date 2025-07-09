@@ -11,6 +11,10 @@ class PartidaRepositoryImpl @Inject constructor(
 ) : PartidaRepository {
     override suspend fun insertPartidaWithValidation(partida: PartidaEntity) = partidaDao.insertWithValidation(partida)
     override fun getAllPartidas(): Flow<List<PartidaEntity>> = partidaDao.getAllPartidas()
+    
+    // NOVO: Implementação para buscar amistosos
+    override fun getAmistosos(): Flow<List<PartidaEntity>> = partidaDao.getAmistosos()
+    
     override fun getPartidasByCampeonatoId(campeonatoId: UUID): Flow<List<PartidaEntity>> = partidaDao.getPartidasByCampeonatoId(campeonatoId)
     override fun getPartidaById(partidaId: UUID): Flow<PartidaEntity?> = partidaDao.getPartidaById(partidaId)
     override suspend fun updatePartida(partida: PartidaEntity) = partidaDao.updatePartida(partida)

@@ -41,12 +41,11 @@ import com.example.cebolafc25.navigation.PLAYER_DETAILS_ROUTE
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun JogadoresScreen(
-    navController: NavController, // Necessário para a navegação
+    navController: NavController,
     viewModel: JogadoresViewModel = hiltViewModel()
 ) {
     val jogadoresState by viewModel.jogadoresState.collectAsStateWithLifecycle()
     val novoJogadorNome by viewModel.novoJogadorNome.collectAsStateWithLifecycle()
-
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(title = { Text(stringResource(id = R.string.players_title)) })
@@ -58,7 +57,6 @@ fun JogadoresScreen(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            // Formulário de Adição
             Text(
                 text = stringResource(id = R.string.players_add_new),
                 style = MaterialTheme.typography.titleLarge,
@@ -86,16 +84,12 @@ fun JogadoresScreen(
                     )
                 }
             }
-
             Spacer(modifier = Modifier.height(24.dp))
-
             Text(
                 text = stringResource(id = R.string.players_registered_title),
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
-
-            // Tratamento dos estados da UI
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 when (val state = jogadoresState) {
                     is UiState.Loading -> {
@@ -120,7 +114,6 @@ fun JogadoresScreen(
                                 items(jogadores, key = { it.id }) { jogador ->
                                     Card(
                                         modifier = Modifier.fillMaxWidth(),
-                                        // Ação de clique para navegar para os detalhes
                                         onClick = { navController.navigate("$PLAYER_DETAILS_ROUTE/${jogador.id}") }
                                     ) {
                                         Row(

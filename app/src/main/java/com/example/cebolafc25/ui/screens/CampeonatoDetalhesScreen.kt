@@ -1,5 +1,6 @@
 package com.example.cebolafc25.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -31,6 +32,7 @@ import com.example.cebolafc25.data.model.PartidaEntity
 import com.example.cebolafc25.domain.model.EstatisticasJogador
 import com.example.cebolafc25.domain.model.UiState
 import com.example.cebolafc25.domain.viewmodel.CampeonatoDetalhesViewModel
+import com.example.cebolafc25.navigation.MATCH_DETAILS_ROUTE
 import com.example.cebolafc25.ui.components.PartidaCard
 import java.util.UUID
 
@@ -41,6 +43,7 @@ fun CampeonatoDetalhesScreen(
     viewModel: CampeonatoDetalhesViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     Scaffold(
         topBar = {
             val title = when (val state = uiState) {
@@ -76,6 +79,7 @@ fun CampeonatoDetalhesScreen(
                 is UiState.Success -> {
                     val detalhesState = state.data
                     TabScreen(
+                        navController = navController, // NOVO: Passando o NavController
                         classificacao = detalhesState.classificacao,
                         partidas = detalhesState.partidas,
                         jogadoresMap = detalhesState.todosJogadores
@@ -88,6 +92,7 @@ fun CampeonatoDetalhesScreen(
 
 @Composable
 fun TabScreen(
+    navController: NavController, // NOVO
     classificacao: List<EstatisticasJogador>,
     partidas: List<PartidaEntity>,
     jogadoresMap: Map<UUID, String>
@@ -106,7 +111,7 @@ fun TabScreen(
         }
         when (tabIndex) {
             0 -> ClassificacaoTab(classificacao)
-            1 -> PartidasTab(partidas, jogadoresMap)
+            1 -> PartidasTab(navController, partidas, jogadoresMap) // NOVO
         }
     }
 }
@@ -125,7 +130,6 @@ fun ClassificacaoTab(classificacao: List<EstatisticasJogador>) {
     ) {
         item {
             Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
-                // CORREÇÃO: Usando o parâmetro nomeado 'modifier'
                 Text(text = stringResource(id = R.string.stats_header_player), modifier = Modifier.weight(2.5f))
                 StatHeader(text = stringResource(id = R.string.stats_header_points), modifier = Modifier.weight(0.8f))
                 StatHeader(text = stringResource(id = R.string.stats_header_played), modifier = Modifier.weight(0.8f))
@@ -143,7 +147,11 @@ fun ClassificacaoTab(classificacao: List<EstatisticasJogador>) {
 }
 
 @Composable
-fun PartidasTab(partidas: List<PartidaEntity>, jogadoresMap: Map<UUID, String>) {
+fun PartidasTab(
+    navController: NavController, // NOVO
+    partidas: List<PartidaEntity>,
+    jogadoresMap: Map<UUID, String>
+) {
     if (partidas.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("Nenhuma partida gerada para este campeonato.")
@@ -158,11 +166,17 @@ fun PartidasTab(partidas: List<PartidaEntity>, jogadoresMap: Map<UUID, String>) 
         items(partidas, key = { it.id }) { partida ->
             val nomeJogador1 = jogadoresMap[partida.jogador1Id] ?: "???"
             val nomeJogador2 = jogadoresMap[partida.jogador2Id] ?: "???"
-            PartidaCard(
-                partida = partida,
-                nomeJogador1 = nomeJogador1,
-                nomeJogador2 = nomeJogador2
-            )
+
+            // NOVO: Card clicável que navega para o registro de resultado
+            Box(modifier = Modifier.clickable {
+                navController.navigate("$MATCH_DETAILS_ROUTE/${partida.id}")
+            }) {
+                PartidaCard(
+                    partida = partida,
+                    nomeJogador1 = nomeJogador1,
+                    nomeJogador2 = nomeJogador2
+                )
+            }
         }
     }
 }

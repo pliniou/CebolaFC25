@@ -7,6 +7,7 @@ import java.util.UUID
 interface PartidaRepository {
     suspend fun insertPartidaWithValidation(partida: PartidaEntity)
     fun getAllPartidas(): Flow<List<PartidaEntity>>
+    fun getAmistosos(): Flow<List<PartidaEntity>> // NOVO
     fun getPartidasByCampeonatoId(campeonatoId: UUID): Flow<List<PartidaEntity>>
     fun getPartidaById(partidaId: UUID): Flow<PartidaEntity?>
     suspend fun updatePartida(partida: PartidaEntity)

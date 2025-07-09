@@ -41,7 +41,6 @@ class PartidaDetalhesViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val matchId: String = savedStateHandle.get<String>(MATCH_ID_ARG) ?: ""
-
     private val _uiState = MutableStateFlow<UiState<PartidaDetalhesState>>(UiState.Loading)
     val uiState: StateFlow<UiState<PartidaDetalhesState>> = _uiState.asStateFlow()
 
@@ -56,12 +55,14 @@ class PartidaDetalhesViewModel @Inject constructor(
         }
         viewModelScope.launch {
             try {
+                // Usar .first() para obter o valor atual do Flow e encerrá-lo
                 val partida = partidaRepository.getPartidaById(UUID.fromString(matchId)).first()
                 if (partida == null) {
                     _uiState.value = UiState.Error("Partida não encontrada.")
                     return@launch
                 }
 
+                // Usar suspend function para obter os jogadores
                 val jogador1 = jogadorRepository.getJogadorById(partida.jogador1Id)
                 val jogador2 = jogadorRepository.getJogadorById(partida.jogador2Id)
 
@@ -107,16 +108,21 @@ class PartidaDetalhesViewModel @Inject constructor(
             val placar2 = currentState.placar2.toIntOrNull()
             val partidaOriginal = currentState.partida
 
-            if (placar1 != null && placar2 != null && partidaOriginal != null) {
+            // Validação para garantir que os campos obrigatórios foram preenchidos
+            if (placar1 != null && placar2 != null && partidaOriginal != null &&
+                currentState.time1Nome.isNotBlank() && currentState.time1Nome != "A definir" &&
+                currentState.time2Nome.isNotBlank() && currentState.time2Nome != "A definir") {
+                
                 val partidaAtualizada = partidaOriginal.copy(
                     placar1 = placar1,
                     placar2 = placar2,
                     time1Nome = currentState.time1Nome,
                     time2Nome = currentState.time2Nome,
-                    partidaFinalizada = true
+                    partidaFinalizada = true // Marcar como finalizada ao salvar
                 )
                 updatePartidaUseCase(partidaAtualizada)
-                // Opcional: navegar de volta ou mostrar um snackbar de sucesso.
+            } else {
+                // Opcional: Enviar um evento de erro para a UI se a validação falhar
             }
         }
     }
