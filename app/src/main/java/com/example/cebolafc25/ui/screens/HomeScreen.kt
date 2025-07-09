@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -39,7 +40,9 @@ fun HomeScreen(
     val ultimasPartidas by viewModel.ultimasPartidas.collectAsStateWithLifecycle()
     val jogadores by viewModel.jogadores.collectAsStateWithLifecycle()
     val unknownPlayer = stringResource(id = R.string.matches_player_unknown)
-
+    val jogadoresMap = remember(jogadores) {
+        jogadores.associateBy({ it.id }, { it.nome })
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -57,7 +60,7 @@ fun HomeScreen(
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
-            Text(stringResource(id = R.string.home_register_friendly_match)) // Texto alterado para clareza
+            Text(stringResource(id = R.string.home_register_friendly_match))
         }
         Button(
             onClick = { navController.navigate(BottomNavItem.Tournaments.route) },
@@ -85,10 +88,8 @@ fun HomeScreen(
         } else {
             LazyColumn(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(ultimasPartidas, key = { it.id }) { partida ->
-                    val nomeJogador1 = jogadores.find { it.id == partida.jogador1Id }?.nome ?: unknownPlayer
-                    val nomeJogador2 = jogadores.find { it.id == partida.jogador2Id }?.nome ?: unknownPlayer
-
-                    // NOVO: Navegação contextual baseada no tipo de partida
+                    val nomeJogador1 = jogadoresMap[partida.jogador1Id] ?: unknownPlayer
+                    val nomeJogador2 = jogadoresMap[partida.jogador2Id] ?: unknownPlayer
                     Box(modifier = Modifier.clickable {
                         val route = if (partida.campeonatoId != null) {
                             "$TOURNAMENT_DETAILS_ROUTE/${partida.campeonatoId}"

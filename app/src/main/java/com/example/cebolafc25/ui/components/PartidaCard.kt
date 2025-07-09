@@ -1,18 +1,14 @@
 package com.example.cebolafc25.ui.components
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,19 +32,30 @@ fun PartidaCard(
         else -> null
     }
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(20.dp)) {
             Text(
-                text = stringResource(id = R.string.matches_date_prefix, partida.data.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))),
+                text = stringResource(
+                    id = R.string.matches_date_prefix,
+                    partida.data.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+                ),
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 8.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 PlayerResultColumn(
@@ -59,7 +66,8 @@ fun PartidaCard(
                 Text(
                     text = "${partida.placar1} x ${partida.placar2}",
                     style = MaterialTheme.typography.headlineMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.primary
                 )
                 PlayerResultColumn(
                     playerName = nomeJogador2,
@@ -72,9 +80,16 @@ fun PartidaCard(
 }
 
 @Composable
-private fun RowScope.PlayerResultColumn(playerName: String, teamName: String, isWinner: Boolean) {
+private fun RowScope.PlayerResultColumn(
+    playerName: String,
+    teamName: String,
+    isWinner: Boolean
+) {
+    val animatedColor by animateColorAsState(
+        targetValue = if (isWinner) MaterialTheme.colorScheme.primary else Color.Unspecified,
+        label = "WinnerColor"
+    )
     val fontWeight = if (isWinner) FontWeight.Bold else FontWeight.Normal
-    val color = if (isWinner) MaterialTheme.colorScheme.primary else Color.Unspecified
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.weight(1f)
@@ -85,7 +100,7 @@ private fun RowScope.PlayerResultColumn(playerName: String, teamName: String, is
             textAlign = TextAlign.Center,
             maxLines = 1,
             fontWeight = fontWeight,
-            color = color
+            color = animatedColor
         )
         Text(
             text = teamName,

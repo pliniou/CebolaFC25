@@ -28,7 +28,6 @@ fun JogadorDetalhesScreen(
     viewModel: JogadorDetalhesViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.jogadorDetalhesState.collectAsStateWithLifecycle()
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -37,7 +36,7 @@ fun JogadorDetalhesScreen(
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.action_back) // Acessibilidade
+                            contentDescription = stringResource(R.string.action_back)
                         )
                     }
                 }
@@ -56,7 +55,7 @@ fun JogadorDetalhesScreen(
                 }
                 is UiState.Error -> {
                     Text(
-                        text = state.message ?: stringResource(R.string.error_unknown), // String de recurso
+                        text = state.message ?: stringResource(R.string.error_unknown),
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(16.dp)
                     )
@@ -71,10 +70,8 @@ fun JogadorDetalhesScreen(
 
 @Composable
 fun DetalhesContent(stats: EstatisticasJogador) {
-    // Exemplo de responsividade: usa BoxWithConstraints para adaptar o layout
     BoxWithConstraints {
         val isTablet = this.maxWidth > 600.dp
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -84,21 +81,17 @@ fun DetalhesContent(stats: EstatisticasJogador) {
         ) {
             Text(stats.jogador.nome, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(24.dp))
-
             if (isTablet) {
-                // Layout em linha para telas largas
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     CardStats(stats, modifier = Modifier.weight(1f))
-                    // Poderia adicionar outra coluna aqui, ex: histórico de partidas
                     Box(modifier = Modifier.weight(1f)) {
                         Text("Histórico de Partidas (A implementar)")
                     }
                 }
             } else {
-                // Layout em coluna para telas estreitas
                 CardStats(stats, modifier = Modifier.fillMaxWidth())
                 Spacer(Modifier.height(16.dp))
                 Text("Histórico de Partidas (A implementar)")

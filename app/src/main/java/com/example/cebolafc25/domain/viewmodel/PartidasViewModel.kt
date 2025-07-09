@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
 
+// CORREÇÃO: Adicionado 'val' a todas as propriedades da data class.
 data class PartidaFormState(
     val jogador1Id: UUID? = null,
     val jogador2Id: UUID? = null,
@@ -62,8 +63,6 @@ class PartidasViewModel @Inject constructor(
     private val teamRepository: TeamRepository,
     private val registerPartidaUseCase: RegisterPartidaUseCase
 ) : ViewModel() {
-
-    // ALTERADO: ViewModel agora expõe apenas amistosos
     val amistosos: StateFlow<List<PartidaEntity>> = partidaRepository.getAmistosos()
         .stateIn(
             scope = viewModelScope,
@@ -84,15 +83,16 @@ class PartidasViewModel @Inject constructor(
     private val _eventChannel = Channel<UiEvent>()
     val uiEvent = _eventChannel.receiveAsFlow()
 
-    fun getAvailableLeagues(): List<String> = teamRepository.getLeagues()
-    fun getTeamsForLeague(leagueName: String): List<TimeEntity> = teamRepository.getTeamsForLeague(leagueName)
+    // Funções agora são 'suspend' para refletir a natureza assíncrona do TeamRepository.
+    suspend fun getAvailableLeagues(): List<String> = teamRepository.getLeagues()
+    suspend fun getTeamsForLeague(leagueName: String): List<TimeEntity> = teamRepository.getTeamsForLeague(leagueName)
 
     fun onEvent(event: PartidaFormEvent) {
         when (event) {
             is PartidaFormEvent.UpdateJogador1 -> _formState.update { it.copy(jogador1Id = event.id) }
             is PartidaFormEvent.UpdateJogador2 -> _formState.update { it.copy(jogador2Id = event.id) }
-            is PartidaFormEvent.UpdateLiga1 -> _formState.update { it.copy(liga1 = event.liga, time1Nome = "") } // Reseta o time ao trocar a liga
-            is PartidaFormEvent.UpdateLiga2 -> _formState.update { it.copy(liga2 = event.liga, time2Nome = "") } // Reseta o time ao trocar a liga
+            is PartidaFormEvent.UpdateLiga1 -> _formState.update { it.copy(liga1 = event.liga, time1Nome = "") }
+            is PartidaFormEvent.UpdateLiga2 -> _formState.update { it.copy(liga2 = event.liga, time2Nome = "") }
             is PartidaFormEvent.UpdateTime1 -> _formState.update { it.copy(time1Nome = event.name) }
             is PartidaFormEvent.UpdateTime2 -> _formState.update { it.copy(time2Nome = event.name) }
             is PartidaFormEvent.UpdatePlacar1 -> _formState.update { it.copy(placar1 = event.score.filter { c -> c.isDigit() }) }
@@ -113,7 +113,6 @@ class PartidasViewModel @Inject constructor(
         viewModelScope.launch {
             val p1 = currentState.placar1.toIntOrNull()
             val p2 = currentState.placar2.toIntOrNull()
-
             if (currentState.jogador1Id != null && currentState.jogador2Id != null && p1 != null && p2 != null) {
                 try {
                     registerPartidaUseCase(

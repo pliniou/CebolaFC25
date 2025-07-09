@@ -16,7 +16,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// Paleta de cores gerada (mantida a partir do projeto original)
 val md_theme_light_primary = Color(0xFF006C48)
 val md_theme_light_onPrimary = Color(0xFFFFFFFF)
 val md_theme_light_secondary = Color(0xFF4D6356)
@@ -84,7 +83,7 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun EAFC25ManagerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false, // Desabilitado para forçar a paleta customizada
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -99,15 +98,12 @@ fun EAFC25ManagerTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            // Tornar as barras de sistema transparentes para o modo Edge-to-Edge
             window.statusBarColor = Color.Transparent.toArgb()
             window.navigationBarColor = Color.Transparent.toArgb()
-            // Definir se os ícones das barras devem ser escuros ou claros
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
             WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !darkTheme
         }
     }
-
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,

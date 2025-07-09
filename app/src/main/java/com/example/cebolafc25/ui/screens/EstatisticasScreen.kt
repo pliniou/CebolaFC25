@@ -26,7 +26,6 @@ fun EstatisticasScreen(
     viewModel: EstatisticasViewModel = hiltViewModel()
 ) {
     val estatisticas by viewModel.estatisticas.collectAsStateWithLifecycle()
-
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(title = { Text(stringResource(id = R.string.stats_title)) })
@@ -47,13 +46,12 @@ fun EstatisticasScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Cabeçalho da tabela
                 item {
                     Row(
                         Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 8.dp)
-                            .semantics { heading() } // Acessibilidade: marca a linha como cabeçalho
+                            .semantics { heading() }
                     ) {
                         Text(stringResource(id = R.string.stats_header_player), Modifier.weight(2.5f), fontWeight = FontWeight.Bold)
                         StatHeader(stringResource(id = R.string.stats_header_points), Modifier.weight(0.8f))
@@ -63,11 +61,8 @@ fun EstatisticasScreen(
                         StatHeader(stringResource(id = R.string.stats_header_losses), Modifier.weight(0.8f))
                         StatHeader(stringResource(id = R.string.stats_header_goal_difference), Modifier.weight(1f))
                     }
-                    // Correção: `Divider` obsoleto substituído por `HorizontalDivider`
                     HorizontalDivider(Modifier.padding(top = 8.dp))
                 }
-
-                // Linhas da tabela
                 items(estatisticas, key = { it.jogador.id }) { stats ->
                     EstatisticaRow(stats = stats)
                 }

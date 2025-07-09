@@ -31,12 +31,7 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -56,21 +51,17 @@ import com.example.cebolafc25.domain.viewmodel.UiEvent
 import com.example.cebolafc25.ui.components.PartidaCard
 import java.util.UUID
 
-// Tela refatorada para gerenciar apenas Amistosos
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PartidasScreen(
     viewModel: PartidasViewModel = hiltViewModel()
 ) {
-    // ALTERADO: agora busca apenas amistosos
     val amistosos by viewModel.amistosos.collectAsStateWithLifecycle()
     val jogadores by viewModel.jogadores.collectAsStateWithLifecycle()
     val formState by viewModel.formState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     val unknownPlayer = stringResource(id = R.string.matches_player_unknown)
-
     LaunchedEffect(key1 = true) {
         viewModel.uiEvent.collect { event ->
             when (event) {
@@ -84,9 +75,8 @@ fun PartidasScreen(
             }
         }
     }
-
     Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = { Text(stringResource(id = R.string.matches_friendly_title)) }) }, // Título alterado
+        topBar = { CenterAlignedTopAppBar(title = { Text(stringResource(id = R.string.matches_friendly_title)) }) },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { paddingValues ->
         Column(
@@ -95,14 +85,13 @@ fun PartidasScreen(
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp)
         ) {
-            // Seção de Formulário movida para o topo para melhor UX
             if (jogadores.size >= 2) {
                 MatchRegistrationForm(
                     formState = formState,
                     onEvent = viewModel::onEvent,
                     jogadores = jogadores,
-                    getAvailableLeagues = viewModel::getAvailableLeagues,
-                    getTeamsForLeague = viewModel::getTeamsForLeague
+                    getAvailableLeagues = { viewModel.getAvailableLeagues() },
+                    getTeamsForLeague = { league -> viewModel.getTeamsForLeague(league) }
                 )
             } else {
                 Box(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), contentAlignment = Alignment.Center) {
@@ -114,16 +103,12 @@ fun PartidasScreen(
                     )
                 }
             }
-
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
             Text(
                 text = "Histórico de Amistosos",
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(bottom = 16.dp, top = 8.dp)
             )
-
-            // Lista de Amistosos
             if (amistosos.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(stringResource(id = R.string.matches_none_registered), style = MaterialTheme.typography.bodyMedium)
@@ -154,8 +139,8 @@ private fun MatchRegistrationForm(
     formState: PartidaFormState,
     onEvent: (PartidaFormEvent) -> Unit,
     jogadores: List<JogadorEntity>,
-    getAvailableLeagues: () -> List<String>,
-    getTeamsForLeague: (String) -> List<TimeEntity>
+    getAvailableLeagues: suspend () -> List<String>,
+    getTeamsForLeague: suspend (String) -> List<TimeEntity>
 ) {
     Column(
         modifier = Modifier
@@ -166,7 +151,6 @@ private fun MatchRegistrationForm(
             style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(bottom = 12.dp)
         )
-        // Player Selection
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             val availableJogadores2 = jogadores.filter { it.id != formState.jogador1Id }
             PlayerDropdown(
@@ -187,28 +171,25 @@ private fun MatchRegistrationForm(
             )
         }
         Spacer(modifier = Modifier.height(12.dp))
-        // Team and Score Selection
         Row(
             verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Player 1 Team Selection
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 GenericDropdown(
                     label = "Liga J1",
                     selectedValue = formState.liga1,
-                    items = getAvailableLeagues(),
+                    getItems = getAvailableLeagues,
                     onItemSelected = { onEvent(PartidaFormEvent.UpdateLiga1(it)) }
                 )
                 GenericDropdown(
                     label = stringResource(id = R.string.matches_team1_label),
                     selectedValue = formState.time1Nome,
-                    items = getTeamsForLeague(formState.liga1).map { it.nome },
+                    getItems = { getTeamsForLeague(formState.liga1).map { it.nome } },
                     onItemSelected = { onEvent(PartidaFormEvent.UpdateTime1(it)) },
                     enabled = formState.liga1.isNotBlank()
                 )
             }
-            // Score
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(top = 24.dp)
@@ -232,18 +213,17 @@ private fun MatchRegistrationForm(
                     textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center)
                 )
             }
-            // Player 2 Team Selection
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 GenericDropdown(
                     label = "Liga J2",
                     selectedValue = formState.liga2,
-                    items = getAvailableLeagues(),
+                    getItems = getAvailableLeagues,
                     onItemSelected = { onEvent(PartidaFormEvent.UpdateLiga2(it)) }
                 )
                 GenericDropdown(
                     label = stringResource(id = R.string.matches_team2_label),
                     selectedValue = formState.time2Nome,
-                    items = getTeamsForLeague(formState.liga2).map { it.nome },
+                    getItems = { getTeamsForLeague(formState.liga2).map { it.nome } },
                     onItemSelected = { onEvent(PartidaFormEvent.UpdateTime2(it)) },
                     enabled = formState.liga2.isNotBlank()
                 )
@@ -275,15 +255,12 @@ private fun PlayerDropdown(
     GenericDropdown(
         label = label,
         selectedValue = selectedPlayerName,
-        items = players.map { it.nome },
+        getItems = { players.map { it.nome } },
         onItemSelected = { selectedName ->
-            players.find { it.nome == selectedName }?.id?.let { onPlayerSelected(it) }
+            players.find { it.nome == selectedName }?.id?.let(onPlayerSelected)
         },
         modifier = modifier,
-        enabled = enabled,
-        itemToValue = { selectedName ->
-            players.find { it.nome == selectedName }?.let { it.nome } ?: ""
-        }
+        enabled = enabled
     )
 }
 
@@ -292,16 +269,18 @@ private fun PlayerDropdown(
 private fun GenericDropdown(
     label: String,
     selectedValue: String,
-    items: List<String>,
+    getItems: suspend () -> List<String>,
     onItemSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean = true,
-    itemToValue: (String) -> String = { it }
+    enabled: Boolean = true
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val items by produceState(initialValue = emptyList<String>(), getItems) {
+        value = getItems()
+    }
     ExposedDropdownMenuBox(
         expanded = expanded && enabled,
-        onExpandedChange = { if (enabled) expanded = !expanded },
+        onExpandedChange = { if (enabled) expanded = !it },
         modifier = modifier
     ) {
         OutlinedTextField(
@@ -322,7 +301,7 @@ private fun GenericDropdown(
                 DropdownMenuItem(
                     text = { Text(item) },
                     onClick = {
-                        onItemSelected(itemToValue(item))
+                        onItemSelected(item)
                         expanded = false
                     }
                 )

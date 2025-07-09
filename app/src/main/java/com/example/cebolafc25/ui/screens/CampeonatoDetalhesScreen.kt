@@ -1,24 +1,13 @@
 package com.example.cebolafc25.ui.screens
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -43,7 +32,6 @@ fun CampeonatoDetalhesScreen(
     viewModel: CampeonatoDetalhesViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
     Scaffold(
         topBar = {
             val title = when (val state = uiState) {
@@ -79,7 +67,7 @@ fun CampeonatoDetalhesScreen(
                 is UiState.Success -> {
                     val detalhesState = state.data
                     TabScreen(
-                        navController = navController, // NOVO: Passando o NavController
+                        navController = navController,
                         classificacao = detalhesState.classificacao,
                         partidas = detalhesState.partidas,
                         jogadoresMap = detalhesState.todosJogadores
@@ -92,7 +80,7 @@ fun CampeonatoDetalhesScreen(
 
 @Composable
 fun TabScreen(
-    navController: NavController, // NOVO
+    navController: NavController,
     classificacao: List<EstatisticasJogador>,
     partidas: List<PartidaEntity>,
     jogadoresMap: Map<UUID, String>
@@ -111,7 +99,7 @@ fun TabScreen(
         }
         when (tabIndex) {
             0 -> ClassificacaoTab(classificacao)
-            1 -> PartidasTab(navController, partidas, jogadoresMap) // NOVO
+            1 -> PartidasTab(navController, partidas, jogadoresMap)
         }
     }
 }
@@ -148,7 +136,7 @@ fun ClassificacaoTab(classificacao: List<EstatisticasJogador>) {
 
 @Composable
 fun PartidasTab(
-    navController: NavController, // NOVO
+    navController: NavController,
     partidas: List<PartidaEntity>,
     jogadoresMap: Map<UUID, String>
 ) {
@@ -166,8 +154,6 @@ fun PartidasTab(
         items(partidas, key = { it.id }) { partida ->
             val nomeJogador1 = jogadoresMap[partida.jogador1Id] ?: "???"
             val nomeJogador2 = jogadoresMap[partida.jogador2Id] ?: "???"
-
-            // NOVO: Card clicável que navega para o registro de resultado
             Box(modifier = Modifier.clickable {
                 navController.navigate("$MATCH_DETAILS_ROUTE/${partida.id}")
             }) {
